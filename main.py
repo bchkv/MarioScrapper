@@ -4,10 +4,8 @@ from pathlib import Path
 import requests
 from bs4 import BeautifulSoup
 import cursor
-
-
-class WrongPasswordError(Exception):
-    pass
+import pandas
+import os
 
 
 logging.basicConfig(filename='log_file.txt',
@@ -35,18 +33,16 @@ class School:
 
     def get_tables(self):
         with requests.session() as session:
-            # print(f"Fetching tables for the school {self.name}...")
             response = session.post(login_url, data={'inputEmail': '',
                                                      'inputPassword': self.password, 'grabar': 'si'})
             response.raise_for_status()
-            # Here we got to check if we logged in successfully, else raise WrongPasswordError
-            # with open(f'{self.name}_main.html', 'w') as main_file:
-            #     main_file.write(response.text)
+            if response.url == login_url:
+                print(f"Could not login to the school {self.login} with the password '{self.password}'!")
+                print("Check credentials for that school and start again!")
+                exit(1)
 
             response = session.get(page_with_tables, headers=headers)
             response.raise_for_status()
-            # with open(f'{self.name}_tables.html', 'w') as tables_file:
-            #     tables_file.write(response.text)
 
             # Now we need to get urls of tables, they always have titles "Concentrado de Información"
             soup = BeautifulSoup(response.content, 'html.parser')
@@ -63,16 +59,24 @@ class School:
                 download_table_url = table_page_soup.find(class_="btn btn-warning btn-sm").get('href')
                 print(f"Downloading table {count + 1} of {number_of_tables}...", end='')
                 print('\r', end='')
-                # print(f"Downloading table {count + 1} from {download_table_url}...")
                 table_file = session.get(download_table_url, allow_redirects=True, stream=True)
+
+                # If the file is not an Excel-table, show error message and continue with the next file
+                correct_content_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                if table_file.headers['Content-Type'] != correct_content_type:
+                    print(f'''Something wrong with the file!\n
+                              Log in manually in the school {self.name} and then check the link: {download_table_url}\n
+                              You can download this file manually and put it in the folder 'Tables''')
+                    continue
+
                 file_name = re.search(f'^.*="(.+)"$', table_file.headers['Content-Disposition']).group(1)
-                # print(f"Saving table {count + 1} in the file {self.name}_{file_name}...")
                 with open(f"tables/{self.name}_{file_name}", 'wb') as file:
                     file.write(table_file.content)
                     School.table_count_check += 1
 
 
-print("Press Ctrl + C to exit.")
+os.system('clear')
+print("Press Ctrl + C to quit the program\n")
 
 list_of_logins = list()
 with open("logins.txt", 'r') as file:

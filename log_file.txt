@@ -9,6 +9,3 @@ Resetting dropped connection: www.edumich.gob.mx
 http://www.edumich.gob.mx:80 "GET /sigem_tel/alta_informe_alumno2223/901/3c2a3acc3ebccb7e62352756b14fd812b6913fe1/ HTTP/1.1" 200 None
 Encoding detection: Found cp852 as plausible (best-candidate) for content. With 30 alternatives.
 Resetting dropped connection: www.edumich.gob.mx
-http://www.edumich.gob.mx:80 "GET /sigem_tel/utileria_validar_promedios2223/901/902ba3cda1883801594b6e1b452790cc53948fda/ HTTP/1.1" 200 None
-Resetting dropped connection: www.edumich.gob.mx
-http://www.edumich.gob.mx:80 "GET /sigem_tel/alta_informe_alumno2223/902/3c2a3acc3ebccb7e62352756b14fd812b6913fe1/ HTTP/1.1" 200 None
