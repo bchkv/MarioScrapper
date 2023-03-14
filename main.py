@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 import cursor
 import pandas
 import os
+import atexit
 
 
 logging.basicConfig(filename='log_file.txt',
@@ -21,7 +22,11 @@ page_with_tables = "http://www.edumich.gob.mx/sigem_tel/sisat_registro_2223/" \
 Path(f"tables").mkdir(parents=True, exist_ok=True)
 
 cursor.hide()
+atexit.register(cursor.show)
 
+# For each xlsx file we need to memorise: school, file name, course year, school group
+tables_data = dict()
+faulty_tables = list()
 
 class School:
     table_count = int(0)
@@ -67,6 +72,10 @@ class School:
                     print(f'''Something wrong with the file!\n
                               Log in manually in the school {self.name} and then check the link: {download_table_url}\n
                               You can download this file manually and put it in the folder 'Tables''')
+                    file_name = f"Unknown table {count + 1} from {self.name}"
+                    faulty_tables.append(file_name)
+                    tables_data[file_name] = {'school': self.name, 'course': None, 'group': None,
+                                              'download_url': download_table_url}
                     continue
 
                 file_name = re.search(f'^.*="(.+)"$', table_file.headers['Content-Disposition']).group(1)
@@ -74,8 +83,21 @@ class School:
                     file.write(table_file.content)
                     School.table_count_check += 1
 
+                file_name = "16ETV0193A_2022_2023_"".xlsx"
+                class_data = re.search(r'"(\d)([a-zA-Z])"', file_name)
+                if class_data:
+                    course_year = class_data.group(1)
+                    group = class_data.group(2)
+                else:
+                    course_year = None
+                    group = None
+                    faulty_tables.append(file_name)
 
-os.system('clear')
+                tables_data[file_name] = {'school': self.name, 'course': course_year, 'group': group,
+                                          'download_url': download_table_url}
+
+
+# os.system('clear')
 print("Press Ctrl + C to quit the program\n")
 
 list_of_logins = list()
@@ -86,4 +108,9 @@ with open("logins.txt", 'r') as file:
 for login in list_of_logins:
     School(login).get_tables()
 
-print(f"\nFinished! Saved {School.table_count_check} of {School.table_count} tables.")
+print(f"\nFinished! Saved {School.table_count_check} of {School.table_count} tables.\n")
+
+for table in faulty_tables:
+    print(f"Something went wrong with the table {table} from the school {tables_data[table]['school']}.\n"
+          f"Please, check it manually: log in into school {tables_data[table]['school']} and go to "
+          f"{tables_data[table]['download_url']}")
