@@ -37,6 +37,8 @@ if __name__ == "__main__":
     if mode == 'update':
         download_tables()
 
+    cursor.show()
     min_input, max_input = input("Ingrese valores mínimo y máximo: ").split(' ')
+    cursor.hide()
     print(f"Coloreando valores entre {min_input} y {max_input}...")
     process_tables(int(min_input), int(max_input))

@@ -6,13 +6,13 @@ update_script = '''
     #!/bin/bash
     cd ~/Desktop/MarioProject
     clear
-    python3 main.py --update
+    python3 main.py update
     '''
 process_script = '''
     #!/bin/bash
     cd ~/Desktop/MarioProject
     clear
-    python3 main.py --process
+    python3 main.py process
     '''
 
 
