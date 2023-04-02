@@ -3,7 +3,6 @@ import re
 from bs4 import BeautifulSoup
 from pathlib import Path
 from globals import tables_data, faulty_tables
-from tqdm import tqdm
 
 headers = {'User-Agent': 'Mozilla/5.0'}
 login_url = 'http://www.edumich.gob.mx/sigem_tel/index/1/'
@@ -35,7 +34,6 @@ class School:
         tables_page_elements = soup.find_all(title="Concentrado de Información")
         return [table_page_element.get('href') for table_page_element in tables_page_elements]
 
-
     def _download_table(self, session, table_url, count, number_of_tables):
         table_page = session.get(table_url, headers=headers)
         table_page.raise_for_status()
@@ -43,14 +41,9 @@ class School:
         table_page_soup = BeautifulSoup(table_page.content, 'html.parser')
         download_table_url = table_page_soup.find(class_="btn btn-warning btn-sm").get('href')
 
+        print(f"Descargando tabla {count + 1} de {number_of_tables}...", end='')
+        print('\r', end='')
         table_file = session.get(download_table_url, allow_redirects=True, stream=True)
-
-        # Get the total file size
-        file_size = int(table_file.headers.get('Content-Length', 0))
-
-        # Initialize the progress bar
-        progress_bar = tqdm(total=file_size, unit='B', unit_scale=True,
-                            desc=f"Downloading table {count + 1} of {number_of_tables}")
 
         correct_content_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         if table_file.headers['Content-Type'] != correct_content_type:
@@ -70,9 +63,7 @@ class School:
             for chunk in table_file.iter_content(chunk_size=1024):
                 if chunk:
                     file.write(chunk)
-                    progress_bar.update(len(chunk))
         School.table_count_check += 1
-        progress_bar.close()
 
         return file_name
 
@@ -84,7 +75,7 @@ class School:
             self._login_to_school(session)
             tables_urls = self._get_tables_urls(session)
             number_of_tables = len(tables_urls)
-            print(f"Found {number_of_tables} tables for the school {self.name}.")
+            print(f"Encontradas {number_of_tables} tablas para la escuela '{self.name}'.")
 
             # Iterate through the table URLs and call the _download_table method
             for count, table_url in enumerate(tables_urls):
