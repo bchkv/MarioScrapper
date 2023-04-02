@@ -23,6 +23,7 @@ def categorize_tables(tables_names_list):
         dict: A dictionary with categorized tables.
     """
     tables_dict = dict()
+    tables_dict['faulty_tables'] = list()
 
     for table_name in tables_names_list:
         if table_name == ".DS_Store" or not re.search(r"^.*\.xlsx$", table_name):
@@ -109,13 +110,15 @@ def process_tables(_min, _max):
 
     tables_dict = categorize_tables(tables_names_list)
 
-    out_directory = os.path.join(os.path.expanduser("~"), "Desktop/out")
+    out_directory = os.path.join(os.path.expanduser("~"), "Desktop/resultado")
 
     # Cleaning out the folder
     shutil.rmtree(out_directory, ignore_errors=True)
 
     red_fill = PatternFill(start_color='EE1111', end_color='EE1111', fill_type='solid')
 
+    if 'faulty_tables' not in tables_dict:
+        tables_dict['faulty_tables'] = list()
     for table_name in tables_names_list:
         if not re.search(r"^.*\.xlsx$", table_name) or table_name in tables_dict['faulty_tables']:
             continue

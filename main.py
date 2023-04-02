@@ -32,8 +32,8 @@ if __name__ == "__main__":
     cursor.hide()
     # Run 'cursor.show' when the script exits
     atexit.register(cursor.show)
-    os.system('clear')
-    print("Press Ctrl + C to quit the program\n")
+    # os.system('clear')
+    print("Presione ctrl + C para salir del programa\n")
     if mode == 'update':
         download_tables()
 
