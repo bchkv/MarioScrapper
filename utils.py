@@ -22,8 +22,8 @@ def set_up_scripts():
     :return:
         None
     """
-    create_script(update_script)
-    create_script(process_script)
+    create_script(update_script, "Actualizar tablas.sh")
+    create_script(process_script, "Tablas de proceso.sh")
 
 
 def create_script(script_text, name):
